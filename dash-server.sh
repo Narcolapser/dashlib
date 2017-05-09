@@ -1,64 +1,43 @@
-#!/bin/bash
-# myapp daemon
-# chkconfig: 345 20 80
-# description: myapp daemon
-# processname: myapp
+nux Standard Base comments
+### BEGIN INIT INFO
+# Provides:          Dash Server
+# Required-Start:    $local_fs $network $remote_fs
+# Required-Stop:     $local_fs $network $remote_fs
+# Should-Start:
+# Should-Stop:
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Dash Button Server
+# Description:       A DHCP server that hijacks the Amazon Dash Buttons.
+### END INIT INFO
 
-DAEMON_PATH="/home/toben/Code/dash-server/server.sh"
+#############################################################
+# Init script for Dash Server
+#############################################################
 
-DAEMON=dash-server
-DAEMONOPTS=""
-
-NAME=dash-server
-DESC="DHCP server for dash buttons."
-PIDFILE=/var/run/$NAME.pid
-SCRIPTNAME=/etc/init.d/$NAME
+# Defaults
+# SCRIPTNAME=/usr/local/DashServer/DashServer.py
+SCRIPTNAME=python simple-dhcp.py -a 192.168.1.1 -i wlan0
 
 case "$1" in
 start)
-	printf "%-50s" "Starting $NAME..."
-	cd $DAEMON_PATH
-	PID=`$DAEMON $DAEMONOPTS > /dev/null 2>&1 & echo $!`
-	#echo "Saving PID" $PID " to " $PIDFILE
-        if [ -z $PID ]; then
-            printf "%s\n" "Fail"
-        else
-            echo $PID > $PIDFILE
-            printf "%s\n" "Ok"
-        fi
-;;
-status)
-        printf "%-50s" "Checking $NAME..."
-        if [ -f $PIDFILE ]; then
-            PID=`cat $PIDFILE`
-            if [ -z "`ps axf | grep ${PID} | grep -v grep`" ]; then
-                printf "%s\n" "Process dead but pidfile exists"
-            else
-                echo "Running"
-            fi
-        else
-            printf "%s\n" "Service not running"
-        fi
-;;
+        $SCRIPTNAME start
+        ;;
 stop)
-        printf "%-50s" "Stopping $NAME"
-            PID=`cat $PIDFILE`
-            cd $DAEMON_PATH
-        if [ -f $PIDFILE ]; then
-            kill -HUP $PID
-            printf "%s\n" "Ok"
-            rm -f $PIDFILE
-        else
-            printf "%s\n" "pidfile not found"
-        fi
-;;
-
+        $SCRIPTNAME stop
+        ;;
 restart)
-  	$0 stop
-  	$0 start
-;;
-
+        $SCRIPTNAME restart
+        ;;
+force-reload)
+        $SCRIPTNAME force-reload
+        ;;
+status)
+        $SCRIPTNAME status
+        ;;
 *)
-        echo "Usage: $0 {status|start|stop|restart}"
-        exit 1
+        echo "Usage: $0 <start|stop|restart|force-reload|status>" >&2
+        exit 3
+        ;;
 esac
+exit 0
