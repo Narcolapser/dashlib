@@ -2,7 +2,7 @@
 
 #originally from https://github.com/psychomario/PyPXE
 
-import socket,binascii,time,os,sys,IN
+import socket,binascii,time,os,sys,IN,signal
 import requests
 from sys import exit
 
@@ -115,20 +115,38 @@ def server():
 		except KeyboardInterrupt:
 			exit()
 
+def start():
+	pid = os.fork()
+	if pid == 0:
+		server()
+#		print("I am the new process!", pid)
+#		while 1:
+#			print("Running!")
+#			time.sleep(1)
+	else:
+		print("New process started with a PID of: ", pid)
+		with open("/var/run/dash-server.pid",'w') as f:
+			f.write(str(pid))
+
+def stop():
+	with open("/var/run/dash-server.pid") as f:
+		pid = int(f.read())
+	try:
+		os.kill(pid,signal.SIGKILL)
+	except OSError as ose:
+		print("No process to stop")
+	with open("/var/run/dash-server.pid",'w') as f:
+		f.write('')
+
+
 if __name__ == "__main__":
 	if sys.argv[1] == 'start':
-		pid = os.fork()
-		if !pid:
-			#server()
-			print("I am the new process!", pid)
-		else:
-			print("New process started with a PID of: ", pid)
+		start()
 	elif sys.argv[1] == 'stop':
-		pass
+		stop()
 	elif sys.argv[1] == 'restart':
-		pass
-	elif sys.argv[1] == 'force-reload':
-		pass
+		stop()
+		start()		
 	else:
-		pass
+		print("Coming soon")
 

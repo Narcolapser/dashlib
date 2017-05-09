@@ -30,14 +30,11 @@ stop)
 restart)
         $SCRIPTNAME restart
         ;;
-force-reload)
-        $SCRIPTNAME force-reload
-        ;;
 status)
         $SCRIPTNAME status
         ;;
 *)
-        echo "Usage: $0 <start|stop|restart|force-reload|status>" >&2
+        echo "Usage: $0 <start|stop|restart|status>" >&2
         exit 3
         ;;
 esac
