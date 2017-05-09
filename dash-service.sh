@@ -1,4 +1,5 @@
-nux Standard Base comments
+#!/bin/sh
+# Linux Standard Base comments
 ### BEGIN INIT INFO
 # Provides:          Dash Server
 # Required-Start:    $local_fs $network $remote_fs
@@ -17,7 +18,7 @@ nux Standard Base comments
 
 # Defaults
 # SCRIPTNAME=/usr/local/DashServer/DashServer.py
-SCRIPTNAME=python simple-dhcp.py -a 192.168.1.1 -i wlan0
+SCRIPTNAME=/home/toben/Code/dash-server/dash-server.py
 
 case "$1" in
 start)

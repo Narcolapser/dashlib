@@ -5,7 +5,6 @@
 import socket,binascii,time,os,sys,IN
 import requests
 from sys import exit
-from optparse import OptionParser
 
 ebStart = 0
 
@@ -45,8 +44,7 @@ def doTheThing(mac):
 	except:
 		print "had a woopsie!"
 
-if __name__ == "__main__":
-
+def server():
 
 	interface = 'wlan0'
 	address = '192.168.1.1'
@@ -116,3 +114,21 @@ if __name__ == "__main__":
 
 		except KeyboardInterrupt:
 			exit()
+
+if __name__ == "__main__":
+	if sys.argv[1] == 'start':
+		pid = os.fork()
+		if !pid:
+			#server()
+			print("I am the new process!", pid)
+		else:
+			print("New process started with a PID of: ", pid)
+	elif sys.argv[1] == 'stop':
+		pass
+	elif sys.argv[1] == 'restart':
+		pass
+	elif sys.argv[1] == 'force-reload':
+		pass
+	else:
+		pass
+
