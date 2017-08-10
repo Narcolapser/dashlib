@@ -138,6 +138,11 @@ def stop():
 	with open("/var/run/dash-server.pid",'w') as f:
 		f.write('')
 
+def status():
+	with open("/var/run/dash-server.pid") as f:
+		pid = int(f.read())
+	print("Dash service found at: " +str( pid))
+
 
 if __name__ == "__main__":
 	if sys.argv[1] == 'start':
@@ -146,7 +151,9 @@ if __name__ == "__main__":
 		stop()
 	elif sys.argv[1] == 'restart':
 		stop()
-		start()		
+		start()
+	elif sys.argv[1] == 'status':
+		status()
 	else:
 		print("Coming soon")
 
