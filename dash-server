@@ -33,9 +33,9 @@ def doTheThing(mac):
 				requests.get("http://192.168.0.102/toggle",timeout=1)
 		if mac == '74:C2:46:B1:27:2A':
 			if time.time() > ebStart + 60:
-				print "Un-assigned was pushed."
+				print "fairy lights pushed."
 				ebStart = time.time()
-#				requests.get("http://192.168.0.13/toggle",timeout=0.001)
+				requests.post("https://maker.ifttt.com/trigger/fair_dash_button/with/key/oKuztFyPxzSFMGyuI4S9mzyNT3_C3WeFYe1Nlo-p0_h")
 
 		if mac == 'B4:CE:F6:09:A2:D7':
 			print "Hello there Iron!"

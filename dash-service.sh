@@ -19,7 +19,8 @@
 # Defaults
 # SCRIPTNAME=/usr/local/DashServer/DashServer.py
 # SCRIPTNAME=/home/toben/Code/dash-server/dash-server.py
-SCRIPTNAME=/usr/local/bin/dash-server
+#SCRIPTNAME=/usr/local/bin/dash-server
+SCRIPTNAME=/home/toben/Code/dash-server/dash-server
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="Dash button service"
 NAME=dash-server
