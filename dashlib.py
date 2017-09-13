@@ -19,11 +19,15 @@ def slicendice(msg,slices):  #generator for each of the dhcp fields
 
 
 
-class DashServer( Object ):
-	def __init__(interface,address):
+class DashServer( object ):
+	def __init__(self,interface,address):
 		self.interface = interface
 		self.address = address
 		self.loop = False
+		self.tasks = {}
+
+	def append(self,task):
+		self.tasks[task.mac] = task
 
 	def run(self):
 #		interface = 'wlan0'
@@ -31,18 +35,18 @@ class DashServer( Object ):
 #		address = '192.168.1.1'
 		address = self.address
 		elements_in_address = address.split('.')
-	        port = 67
-	        offerfrom = '.'.join(elements_in_address[0:3])
-        	offerfrom = offerfrom + '.100'
-	        offerto = '.'.join(elements_in_address[0:3])
-	        offerto = offerto + '.150'
-	        broadcast = '.'.join(elements_in_address[0:3])
-	        broadcast = broadcast + '.254'
-	        netmask = '255.255.255.0'
-	        tftp = address
-	        dns = '8.8.8.8'
-	        gateway = address
-	        pxefilename = 'pxelinux.0'
+		port = 67
+		offerfrom = '.'.join(elements_in_address[0:3])
+		offerfrom = offerfrom + '.100'
+		offerto = '.'.join(elements_in_address[0:3])
+		offerto = offerto + '.150'
+		broadcast = '.'.join(elements_in_address[0:3])
+		broadcast = broadcast + '.254'
+		netmask = '255.255.255.0'
+		tftp = address
+		dns = '8.8.8.8'
+		gateway = address
+		pxefilename = 'pxelinux.0'
 		leasetime=86400 #int
 		leases=[]
 	
@@ -77,41 +81,24 @@ class DashServer( Object ):
 					mac += mac_temp[i*2:i*2+2]
 					mac += ":"
 				mac += mac_temp[10:]
-				doTheThing(mac)
+				self.executeTask(mac)
 
 			except KeyboardInterrupt:
 				exit()
 
 	def executeTask(self,mac):
-		print mac
-		global ebStart
+		print("Request from: " + mac)
 		try:
-			if mac == 'F0:4F:7C:BD:8E:EB':
-				if time.time() > ebStart + 60:
-					print "Kitchen light button was pushed."
-					ebStart = time.time()
-					requests.get("http://192.168.0.101/toggle",timeout=1)
-			if mac == 'F0:27:2D:3B:1D:4B':
-				if time.time() > ebStart + 60:
-					print "Garage door button was pushed!"
-					ebStart = time.time()
-					requests.get("http://192.168.0.102/toggle",timeout=1)
-			if mac == '74:C2:46:B1:27:2A':
-				if time.time() > ebStart + 60:
-					print "fairy lights pushed."
-					ebStart = time.time()
-					requests.post("https://maker.ifttt.com/trigger/fair_dash_button/with/key/oKuztFyPxzSFMGyuI4S9mzyNT3_C3WeFYe1Nlo-p0_h")
-
-			if mac == 'B4:CE:F6:09:A2:D7':
-				print "Hello there Iron!"
+			self.tasks[mac]()
 		except requests.exceptions.Timeout:
-			print "timeout."
-		except:
-			print "had a woopsie!"
+			print("timeout.")
+		except Exception as e:
+			print("Error encountered: {0}".format(e))
 		
 
-class Task( Object ):
-	def __init__(self):
+class Task( object ):
+	def __init__(self,mac):
+		self.mac = mac
 		self.timer = 0
 		self.delay = 60
 
@@ -124,8 +111,8 @@ class Task( Object ):
 		print("Default task run")
 
 class IFTTT_Task( Task ):
-	def __init__(self,event=none,key=none,url=url):
-		super(IFTTT_Task,self).__init__()
+	def __init__(self,mac,event=None,key=None,url=None):
+		super(IFTTT_Task,self).__init__(mac)
 		self.event = event
 		self.key = key
 		self.url = url
@@ -137,51 +124,9 @@ class IFTTT_Task( Task ):
 			requests.post(self.url)
 
 class HTTP_Task( Task ):
-	def __init__(self,request):
+	def __init__(self,mac,request):
+		super(HTTP_Task,self).__init__(mac)
 		self.request = request
 
 	def run(self):
-		requests.get(self.request)
-
-def start():
-	pid = os.fork()
-	if pid == 0:
-		server()
-#		print("I am the new process!", pid)
-#		while 1:
-#			print("Running!")
-#			time.sleep(1)
-	else:
-		print("New process started with a PID of: ", pid)
-		with open("/var/run/dash-server.pid",'w') as f:
-			f.write(str(pid))
-
-def stop():
-	with open("/var/run/dash-server.pid") as f:
-		pid = int(f.read())
-	try:
-		os.kill(pid,signal.SIGKILL)
-	except OSError as ose:
-		print("No process to stop")
-	with open("/var/run/dash-server.pid",'w') as f:
-		f.write('')
-
-def status():
-	with open("/var/run/dash-server.pid") as f:
-		pid = int(f.read())
-	print("Dash service found at: " +str( pid))
-
-
-if __name__ == "__main__":
-	if sys.argv[1] == 'start':
-		start()
-	elif sys.argv[1] == 'stop':
-		stop()
-	elif sys.argv[1] == 'restart':
-		stop()
-		start()
-	elif sys.argv[1] == 'status':
-		status()
-	else:
-		print("Coming soon")
-
+		requests.get(self.request,timeout=1)
